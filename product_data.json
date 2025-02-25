@@ -1,0 +1,15 @@
+{
+    "product_name": "Super Health Capsules",
+    "ingredients": [
+        "Vitamin C",
+        "Omega-3",
+        "Iron"
+    ],
+    "dosage": "1 capsule daily",
+    "expiry_date": "Jan 2026",
+    "health_claims": {
+        "Vitamin C": "Generate a short and FSSAI-compliant health claim for Vitamin C. The claim was made after several people received a letter from a health care provider in April claiming that they were getting a health check or other medical benefits. A spokeswoman for",
+        "Omega-3": "Generate a short and FSSAI-compliant health claim for Omega-3.\n\n\nIf you take this seriously, you may be left off by the amount of this information, or are aware it should come to light. You do",
+        "Iron": "Generate a short and FSSAI-compliant health claim for Iron.\n\n\nThat's where she begins making informed decision about a new contract, which could be interesting, since the new service could be made available via the FFT,"
+    }
+}
