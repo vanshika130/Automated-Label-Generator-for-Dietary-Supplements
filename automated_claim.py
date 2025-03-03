@@ -1,59 +1,73 @@
 import os
 import json
-import requests
 import google.generativeai as genai
+from dotenv import load_dotenv
 
-# Load API Key from environment
-api_key = os.getenv("GOOGLE_API_KEY")  
+load_dotenv()
+
+# ✅ Load API Key from Environment
+api_key = os.getenv("GOOGLE_API_KEY")
 if not api_key:
     raise ValueError("❌ API key not found. Set GOOGLE_API_KEY in your environment variables!")
 
-# **Step 1: Test API Key using a cURL equivalent in Python**
-def test_gemini_api():
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
-    headers = {"Content-Type": "application/json"}
-    data = {
-        "contents": [{
-            "parts": [{"text": "Explain how AI works"}]
-        }]
-    }
-    response = requests.post(url, headers=headers, json=data)
-    
-    if response.status_code == 200:
-        print("✅ API Test Passed: ", response.json()["candidates"][0]["content"]["parts"][0]["text"])
-    else:
-        print(f"❌ API Test Failed: {response.text}")
-        return False
-    return True
+# ✅ Configure Gemini API
+genai.configure(api_key=api_key)
+model = genai.GenerativeModel("gemini-1.5-flash")
 
-# **Step 2: Generate Health Claims for Ingredients**
-def generate_health_claims():
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-1.5-flash")
+def generate_health_claims(json_file="product_data.json"):
+    """Reads product data from JSON, generates health claims, and updates JSON."""
 
-    # Load product data
-    with open("product_data.json", "r") as file:
-        product_data = json.load(file)
+    # ✅ Load product data
+    try:
+        with open(json_file, "r") as file:
+            product_data = json.load(file)
+            print("📂 Loaded product_data.json successfully.")
+    except (json.JSONDecodeError, FileNotFoundError):
+        print("❌ Error: JSON file is missing or corrupt!")
+        return
 
-    ingredients = product_data.get("ingredients", [])
-    claims = {}
+    # ✅ Ensure 'ingredients' exist
+    if "ingredients" not in product_data:
+        print("❌ Error: 'ingredients' key not found in product_data.json!")
+        return
 
-    for ingredient in ingredients:
-        print(f"📝 Generating claim for {ingredient}...")
+    # ✅ Ensure 'health_claims' exist in JSON
+    if "health_claims" not in product_data:
+        product_data["health_claims"] = {}
+
+    print(f"🍀 Ingredients found: {product_data['ingredients']}")
+
+    # ✅ Function to generate a single health claim
+    def generate_claim(ingredient):
+        """Generate a health claim for an ingredient using Gemini API."""
+        
+        # ✅ Check if claim already exists
+        if ingredient in product_data["health_claims"] and product_data["health_claims"][ingredient].strip():
+            print(f"🔄 Using existing claim for {ingredient}: {product_data['health_claims'][ingredient]}")
+            return product_data["health_claims"][ingredient]  # ✅ Fetch from file
+        
+        print(f"📝 Generating new claim for {ingredient}...")
+
         try:
             response = model.generate_content(f"Write a short health claim for {ingredient}.")
-            claims[ingredient] = response.text
-            print(f"✅ Claim for {ingredient}: {response.text}")
+            claim = response.text.strip()
+            print(f"✅ Generated claim for {ingredient}: {claim}")
         except Exception as e:
             print(f"❌ Error generating claim for {ingredient}: {e}")
+            claim = "Error generating claim"
 
-    # Save updated claims back to JSON
-    product_data["claims"] = claims
-    with open("product_data.json", "w") as file:
+        return claim
+
+    # ✅ Generate claims only for new ingredients
+    for ingredient in product_data["ingredients"]:
+        product_data["health_claims"][ingredient] = generate_claim(ingredient)
+
+    # ✅ Save updated claims back to JSON
+    with open(json_file, "w") as file:
         json.dump(product_data, file, indent=4)
 
-    print("🎉 Health claims saved successfully!")
+    print("🎉 Health claims generated and saved successfully in product_data.json!")
 
-# **Run the script**
-if test_gemini_api():
+# ✅ Run the function if this script is executed directly
+if __name__ == "__main__":
     generate_health_claims()
