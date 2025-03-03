@@ -1,7 +1,7 @@
 import barcode
 from barcode.writer import ImageWriter
 
-# .venv\Scripts\Activate === to actiate the environment
+
 
 
 def generate_barcode(product_data):

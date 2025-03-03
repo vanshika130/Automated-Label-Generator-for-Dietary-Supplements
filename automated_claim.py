@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# .venv\Scripts\Activate === to actiate the environment
+
 # ✅ Load API Key from Environment
 api_key = os.getenv("GOOGLE_API_KEY")
 if not api_key:
